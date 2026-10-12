@@ -2827,6 +2827,331 @@
           animation: none;
         }
       }
+
+      /* =========================================================================
+   CLIP STUDIO — source picker, recorder, editor, real video playback
+   ========================================================================= */
+      .clipVid {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #000;
+      }
+      .clipNone {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        color: #edf3ea;
+        text-align: center;
+        padding: 26px;
+      }
+
+      /* ---- source picker ---- */
+      .srcGrid {
+        display: grid;
+        gap: 10px;
+      }
+      .srcCard {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        text-align: left;
+        width: 100%;
+        padding: 14px;
+        background: var(--card);
+        border: 1.5px solid var(--ink);
+        border-radius: var(--r, 9px);
+        box-shadow: var(--sh, 3px 3px 0 var(--ink));
+        cursor: pointer;
+        font-family: inherit;
+        transition: transform 0.1s, box-shadow 0.1s;
+      }
+      .srcCard:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--ink);
+      }
+      .srcCard .srcIc {
+        flex: 0 0 auto;
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        background: var(--mint, #cbe4d5);
+        border: 1.5px solid var(--ink);
+        border-radius: var(--r-s, 6px);
+      }
+      .srcCard h3 {
+        margin: 0 0 3px;
+        font-size: 15px;
+      }
+      .srcCard p {
+        margin: 0;
+        font-size: 12.5px;
+        line-height: 1.4;
+        color: var(--ink2);
+      }
+
+      /* ---- recorder ---- */
+      .recStage {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 9 / 16;
+        max-height: 64vh;
+        background: #0c0c08;
+        border: 1.5px solid var(--ink);
+        border-radius: var(--r, 9px);
+        overflow: hidden;
+        box-shadow: var(--sh2, 5px 5px 0 var(--ink));
+      }
+      .recStage video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transform: scaleX(-1);
+      }
+      .recStage.screen video {
+        transform: none;
+      }
+      .recBadge {
+        position: absolute;
+        top: 9px;
+        left: 9px;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 9px;
+        background: rgba(23, 23, 15, 0.86);
+        border: 1.5px solid #edf3ea;
+        border-radius: 999px;
+        color: #edf3ea;
+        font-family: var(--mono, ui-monospace, monospace);
+        font-size: 10.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .recDot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--brick, #cf3f2c);
+        animation: recPulse 1.1s ease-in-out infinite;
+      }
+      @keyframes recPulse {
+        50% {
+          opacity: 0.25;
+        }
+      }
+      .recBar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 4px;
+        background: rgba(237, 243, 234, 0.2);
+        z-index: 3;
+      }
+      .recBar i {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: var(--brick, #cf3f2c);
+        transition: width 0.25s linear;
+      }
+      .recTray {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .recBtn {
+        position: relative;
+        width: 74px;
+        height: 74px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: var(--card);
+        border: 2px solid var(--ink);
+        box-shadow: var(--sh, 3px 3px 0 var(--ink));
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        font-family: inherit;
+        transition: transform 0.1s;
+      }
+      .recBtn:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--ink);
+      }
+      .recBtn i {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--brick, #cf3f2c);
+        transition:
+          border-radius 0.18s,
+          width 0.18s,
+          height 0.18s;
+      }
+      .recBtn.on i {
+        border-radius: 5px;
+        width: 26px;
+        height: 26px;
+      }
+      .recSide {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        align-items: center;
+        width: 76px;
+      }
+      .recSide .btn {
+        width: 100%;
+        font-size: 11px;
+        padding: 9px 4px;
+      }
+
+      /* ---- editor ---- */
+      .editPrev {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 9 / 16;
+        max-height: 52vh;
+        background: #0c0c08;
+        border: 1.5px solid var(--ink);
+        border-radius: var(--r, 9px);
+        overflow: hidden;
+        box-shadow: var(--sh2, 5px 5px 0 var(--ink));
+      }
+      .editPrev video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        background: #0c0c08;
+      }
+      .editMeta {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 3;
+        display: flex;
+        gap: 6px;
+      }
+      .filterRail {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 2px 0 8px;
+        scrollbar-width: thin;
+      }
+      .filterRail::-webkit-scrollbar {
+        height: 5px;
+      }
+      .fchip {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        background: none;
+        border: 0;
+        padding: 0;
+        font-family: inherit;
+      }
+      .fchip .fsw {
+        width: 46px;
+        height: 46px;
+        border: 1.5px solid var(--ink);
+        border-radius: var(--r-s, 6px);
+        background: linear-gradient(135deg, #cbe4d5, #3b6ea5);
+        box-shadow: 2px 2px 0 var(--ink);
+        transition: transform 0.1s;
+      }
+      .fchip:active .fsw {
+        transform: translate(2px, 2px);
+        box-shadow: 0 0 0 var(--ink);
+      }
+      .fchip.on .fsw {
+        outline: 3px solid var(--hl, #ffd84d);
+        outline-offset: 1px;
+      }
+      .fchip span {
+        font-family: var(--mono, ui-monospace, monospace);
+        font-size: 9px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--ink3);
+      }
+      .fchip.on span {
+        color: var(--ink);
+      }
+      .trimWell {
+        padding: 11px 12px;
+        background: var(--card2, #f4f1e7);
+        border: 1.5px solid var(--ink);
+        border-radius: var(--r-s, 6px);
+      }
+      .trimRow {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-top: 8px;
+      }
+      .trimRow .lbl {
+        font-family: var(--mono, ui-monospace, monospace);
+        font-size: 9.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink3);
+        width: 34px;
+        flex: 0 0 auto;
+      }
+      .trimRow input[type="range"] {
+        flex: 1;
+        min-width: 0;
+      }
+      .trimRow .val {
+        font-family: var(--mono, ui-monospace, monospace);
+        font-size: 11.5px;
+        width: 44px;
+        text-align: right;
+        flex: 0 0 auto;
+        font-variant-numeric: tabular-nums;
+      }
+      .editTray {
+        display: flex;
+        gap: 9px;
+        margin-top: 14px;
+      }
+      .editTray .btn {
+        flex: 1;
+      }
+      .spin {
+        display: inline-block;
+        width: 13px;
+        height: 13px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        vertical-align: -2px;
+        margin-right: 6px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -3158,8 +3483,10 @@
           <div id="toasts"></div>
         </div>
       </div>
-    </div>
+      </div>
 
+    <script src="Lib/media.js"></script>
+    <script src="Lib/clipstudio.js"></script>
     <script>
       "use strict";
       /* =========================================================================
@@ -7498,7 +7825,7 @@
                 );
               })
               .join("") +
-            '<button class="ringw" data-act="compose" data-id="clip"><span class="ring" style="background:var(--line2)"><span class="avatar" style="background:var(--card);border-style:dashed">' +
+            '<button class="ringw" data-act="go" data-to="clipmake"><span class="ring" style="background:var(--line2)"><span class="avatar" style="background:var(--card);border-style:dashed">' +
             I("plus", "s") +
             "</span></span><span>add yours</span></button></div>";
           /* clip rail */
@@ -7530,7 +7857,7 @@
                       "…</i></span></button>",
                   )
                   .join("") +
-                '<button class="clipTile" style="background:var(--card);display:grid;place-items:center" data-act="compose" data-id="clip">' +
+                '<button class="clipTile" style="background:var(--card);display:grid;place-items:center" data-act="go" data-to="clipmake">' +
                 '<span style="text-align:center;padding:8px"><span class="ic">' +
                 I("plus", "l") +
                 '</span><b style="display:block;font-size:10.5px;margin-top:6px">post a clip</b></span></button></div>';
@@ -11702,7 +12029,8 @@
         const u = byId(c.uid),
           liked = S.clipLikes[c.id],
           saved = S.clipSaves[c.id],
-          muted = S.clipMuted[c.id];
+          /* undefined counts as muted so autoplay is never refused */
+          muted = S.clipMuted[c.id] !== false;
         const pend = !c.approved;
         return (
           '<div class="reel" data-reel="' +
@@ -11712,7 +12040,11 @@
           (10 + Math.round(c.likes % 9)) +
           's"></i></div>' +
           '<div class="bg">' +
-          frameSVG(c.scene, c.t * 7 + i) +
+          (c.blobId
+            ? '<video class="clipVid" data-cv="' +
+              c.id +
+              '" muted loop playsinline preload="metadata"></video>'
+            : frameSVG(c.scene, c.t * 7 + i)) +
           '</div><div class="shade"></div>' +
           '<div class="reelTop">' +
           CLIP_SEGS.map(
@@ -11725,7 +12057,7 @@
               sg[1] +
               "</button>",
           ).join("") +
-          '<div class="grow"></div><button class="reelPill" data-act="go" data-to="compose">' +
+          '<div class="grow"></div><button class="reelPill" data-act="go" data-to="clipmake">' +
           I("plus", "s") +
           "clip</button></div>" +
           (pend
@@ -11826,9 +12158,9 @@
           const l = clipList();
           if (!l.length)
             return (
-              '<div class="empty" style="color:#8B8878"><h3 style="color:#EDF3EA">Nothing in Yours yet</h3><div class="tiny">Post a clip and it will wait here until a moderator clears it. Nobody else can see it before that.</div><div style="height:12px"></div><button class="btn pri" data-act="compose">' +
+              '<div class="empty" style="color:#8B8878"><h3 style="color:#EDF3EA">Nothing here yet</h3><div class="tiny">Record a clip and it waits here until a moderator clears it. Nobody else sees it before that.</div><div style="height:12px"></div><button class="btn pri" data-act="go" data-to="clipmake">' +
               I("plus", "s") +
-              "Post a clip</button></div>"
+              "Make a clip</button></div>"
             );
           return (
             '<div class="reels" id="reels">' +
@@ -11838,9 +12170,55 @@
         },
         after() {
           const r = el("#reels");
-          if (r && S.clipIdx) {
-            r.scrollTop = S.clipIdx * r.clientHeight;
+          if (r && S.clipIdx) r.scrollTop = S.clipIdx * r.clientHeight;
+
+          /* attach the real blob to any reel that has one behind it */
+          const vids = document.querySelectorAll("video[data-cv]");
+          for (let i = 0; i < vids.length; i++) {
+            const v = vids[i];
+            if (v._wired) continue;
+            v._wired = 1;
+            const cid = v.getAttribute("data-cv");
+            v.muted = S.clipMuted[cid] !== false;
+            clipFetch(cid).then((rec) => {
+              if (!rec || !rec.blob || !document.body.contains(v)) return;
+              const m = rec.meta || {};
+              v.src = URL.createObjectURL(rec.blob);
+              v.style.filter =
+                (m.grade && AbStudio.filterString(m.grade)) || "none";
+              if (m.cut && m.cut[0]) {
+                v.addEventListener(
+                  "loadedmetadata",
+                  () => {
+                    try {
+                      v.currentTime = m.cut[0];
+                    } catch (e) {}
+                  },
+                  { once: true },
+                );
+                v.addEventListener("timeupdate", () => {
+                  if (m.cut[1] && v.currentTime >= m.cut[1]) {
+                    try {
+                      v.currentTime = m.cut[0];
+                    } catch (e) {}
+                  }
+                });
+              }
+              playReel(cid);
+            });
           }
+
+          if (r && !r._wired) {
+            r._wired = 1;
+            r.onscroll = () => {
+              const i = Math.round(r.scrollTop / Math.max(1, r.clientHeight));
+              S.clipIdx = Math.max(0, i);
+              const cur = clipList()[S.clipIdx];
+              playReel(cur ? cur.id : null);
+            };
+          }
+          const cur = clipList()[S.clipIdx];
+          if (cur) playReel(cur.id);
         },
       };
       function clipSheet(c) {
@@ -13927,6 +14305,597 @@
           }
         }
       });
+      /* =========================================================================
+   CLIP STUDIO · real capture → edit → post
+   Built on Lib/media.js (AbMedia) and Lib/clipstudio.js (AbStudio), both
+   loaded in <head>. Blobs live in IndexedDB so a clip survives a reload.
+   ========================================================================= */
+      const CLIP_DB = "afterbell",
+        CLIP_STORE = "clipblobs";
+      let _clipOpen = null;
+      function clipDb() {
+        if (!_clipOpen)
+          _clipOpen = AbMedia.store
+            .open(CLIP_DB, 1, (db) => {
+              if (!db.objectStoreNames.contains(CLIP_STORE))
+                db.createObjectStore(CLIP_STORE, { keyPath: "id" });
+            })
+            .catch((e) => {
+              _clipOpen = null;
+              throw e;
+            });
+        return _clipOpen;
+      }
+      function clipPut(rec) {
+        return clipDb()
+          .then(() => AbMedia.store.put(CLIP_DB, CLIP_STORE, rec))
+          .then(() => true)
+          .catch(() => false);
+      }
+      function clipFetch(id) {
+        return clipDb()
+          .then(() => AbMedia.store.get(CLIP_DB, CLIP_STORE, id))
+          .then((r) => r || null)
+          .catch(() => null);
+      }
+      function clipHydrate() {
+        return clipDb()
+          .then(() => AbMedia.store.all(CLIP_DB, CLIP_STORE))
+          .then((all) => {
+            (all || []).forEach((r) => {
+              if (!r || !r.meta || CLIPS.some((c) => c.id === r.meta.id))
+                return;
+              CLIPS.unshift(Object.assign({}, r.meta, { blobId: r.id }));
+            });
+          })
+          .catch(() => {});
+      }
+      clipHydrate();
+
+      const STUDIO = {
+        src: null,
+        stream: null,
+        handle: null,
+        blob: null,
+        url: null,
+        dur: 0,
+        probing: false,
+        facing: "user",
+        trim: { a: 0, b: 0 },
+        filter: "none",
+        caption: "",
+        ms: 0,
+        tick: null,
+        watch: null,
+        busy: false,
+        err: "",
+      };
+      function fmtT(s) {
+        s = Math.max(0, Math.round(Number(s) || 0));
+        return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+      }
+      function studioStop() {
+        if (STUDIO.tick) {
+          clearInterval(STUDIO.tick);
+          STUDIO.tick = null;
+        }
+        if (STUDIO.watch) {
+          clearInterval(STUDIO.watch);
+          STUDIO.watch = null;
+        }
+        if (STUDIO.handle) {
+          try {
+            STUDIO.handle.stop();
+          } catch (e) {}
+          STUDIO.handle = null;
+        }
+        if (STUDIO.stream) {
+          try {
+            STUDIO.stream.getTracks().forEach((t) => t.stop());
+          } catch (e) {}
+        }
+        STUDIO.stream = null;
+      }
+      function studioClear() {
+        studioStop();
+        if (STUDIO.url) {
+          try {
+            URL.revokeObjectURL(STUDIO.url);
+          } catch (e) {}
+        }
+        STUDIO.src = STUDIO.blob = STUDIO.url = null;
+        STUDIO.dur = 0;
+        STUDIO.ms = 0;
+        STUDIO.probing = false;
+        STUDIO.trim = { a: 0, b: 0 };
+        STUDIO.filter = "none";
+        STUDIO.caption = "";
+        STUDIO.busy = false;
+        STUDIO.err = "";
+      }
+
+      /* ---- only the reel on screen is allowed to play ---- */
+      function playReel(id) {
+        const vids = document.querySelectorAll("video[data-cv]");
+        for (let i = 0; i < vids.length; i++) {
+          const v = vids[i];
+          if (v.getAttribute("data-cv") === id) {
+            const p = v.play();
+            if (p && p.catch) p.catch(() => {});
+          } else {
+            try {
+              v.pause();
+            } catch (e) {}
+          }
+        }
+      }
+
+      /* ---- screen · source picker + recorder ---- */
+      SCREENS.clipmake = {
+        flat: true,
+        pad: false,
+        render() {
+          let h =
+            '<div class="row sb" style="align-items:flex-start;padding-bottom:12px">' +
+            '<div><div class="meta">Clips · new</div><h2>' +
+            (STUDIO.stream ? "Rolling" : "Make a clip") +
+            "</h2></div>" +
+            '<button class="iconbtn ghost" data-act="clipAbandon" aria-label="close">' +
+            I("x", "s") +
+            "</button></div>";
+          if (STUDIO.err)
+            h +=
+              '<div class="notice brick" style="margin-bottom:12px">' +
+              esc(STUDIO.err) +
+              "</div>";
+
+          if (!STUDIO.stream) {
+            const card = (id, ic, title, note) =>
+              '<button class="srcCard" data-act="clipSrc" data-id="' +
+              id +
+              '"><span class="srcIc">' +
+              I(ic, "l") +
+              "</span><span><h3>" +
+              title +
+              "</h3><p>" +
+              note +
+              "</p></span></button>";
+            return (
+              '<div class="stack">' +
+              h +
+              '<div class="srcGrid">' +
+              card(
+                "camera",
+                "video",
+                "Camera",
+                "Record straight from the device. The front camera is mirrored.",
+              ) +
+              card(
+                "screen",
+                "grid",
+                "Screen",
+                "Capture a screen — slides, a game, a thread. Audio comes if the browser allows it.",
+              ) +
+              card(
+                "file",
+                "play",
+                "From your files",
+                "Pick a video that is already on the device. It opens straight in the editor.",
+              ) +
+              "</div>" +
+              '<div class="notice">' +
+              I("lock", "s") +
+              " Clips stay pending until a moderator clears them. Nobody else sees yours before that.</div>" +
+              '<input type="file" id="clipFile" accept="video/*" style="display:none">' +
+              "</div>"
+            );
+          }
+
+          const screenMode = STUDIO.src === "screen";
+          return (
+            '<div class="stack">' +
+            h +
+            '<div class="recStage' +
+            (screenMode ? " screen" : "") +
+            '"><video id="recPrev" autoplay muted playsinline></video>' +
+            '<div class="recBadge"><span class="recDot"></span><span id="recTime">' +
+            fmtT(STUDIO.ms / 1000) +
+            ' / 1:00</span></div>' +
+            '<div class="recBar"><i id="recFill" style="width:' +
+            Math.min(100, (STUDIO.ms / 60000) * 100) +
+            '%"></i></div></div>' +
+            '<div class="recTray">' +
+            '<div class="recSide"><button class="btn ghost" data-act="clipAbandon">' +
+            I("x", "s") +
+            "Cancel</button></div>" +
+            '<button class="recBtn' +
+            (STUDIO.handle ? " on" : "") +
+            '" data-act="clipRec" aria-label="record"><i></i></button>' +
+            '<div class="recSide"><button class="btn ghost" data-act="clipSwap">' +
+            I("sliders", "s") +
+            (screenMode ? "Source" : "Flip") +
+            "</button></div></div>" +
+            '<div class="meta" style="text-align:center">60 second cap · tap the square to stop</div>' +
+            "</div>"
+          );
+        },
+        after() {
+          const v = el("#recPrev");
+          if (v && STUDIO.stream && v.srcObject !== STUDIO.stream) {
+            v.srcObject = STUDIO.stream;
+            const p = v.play();
+            if (p && p.catch) p.catch(() => {});
+          }
+          const f = el("#clipFile");
+          if (f)
+            f.onchange = () => {
+              const file = f.files && f.files[0];
+              if (!file) return;
+              studioClear();
+              STUDIO.blob = file;
+              STUDIO.src = "file";
+              STUDIO.err = "";
+              go("clipedit");
+            };
+          /* leaving this screen must kill the camera. no exceptions. */
+          if (STUDIO.stream && !STUDIO.watch)
+            STUDIO.watch = setInterval(() => {
+              if (S.route !== "clipmake") studioStop();
+            }, 300);
+        },
+      };
+
+      /* ---- screen · trim + grade + caption ---- */
+      SCREENS.clipedit = {
+        flat: true,
+        pad: false,
+        render() {
+          if (!STUDIO.blob)
+            return (
+              '<div class="empty"><h3>Nothing to edit</h3><div class="tiny">The take did not come through. Pick another source and go again.</div><div style="height:12px"></div>' +
+              '<button class="btn pri" data-act="go" data-to="clipmake">' +
+              I("plus", "s") +
+              "Start over</button></div>"
+            );
+          const url = STUDIO.url || (STUDIO.url = URL.createObjectURL(STUDIO.blob));
+          const d = STUDIO.dur || 0;
+          const F = AbStudio.FILTERS || {};
+          const chips = Object.keys(F)
+            .map(
+              (k) =>
+                '<button class="fchip' +
+                (STUDIO.filter === k ? " on" : "") +
+                '" data-act="clipFilterSet" data-id="' +
+                k +
+                '"><span class="fsw" style="filter:' +
+                (AbStudio.filterString(k) || "none") +
+                '"></span><span>' +
+                k +
+                "</span></button>",
+            )
+            .join("");
+          const rng = (lbl, id, val) =>
+            '<div class="trimRow"><span class="lbl">' +
+            lbl +
+            '</span><input type="range" min="0" max="' +
+            Math.max(0.2, d) +
+            '" step="0.1" value="' +
+            val +
+            '" data-in="' +
+            id +
+            '"><span class="val" id="tv-' +
+            id +
+            '">' +
+            fmtT(val) +
+            "</span></div>";
+
+          return (
+            '<div class="stack">' +
+            '<div class="row sb" style="align-items:flex-start;padding-bottom:12px">' +
+            '<div><div class="meta">Clips · edit</div><h2>Trim and grade</h2></div>' +
+            '<button class="iconbtn ghost" data-act="clipDiscard" aria-label="discard">' +
+            I("x", "s") +
+            "</button></div>" +
+            '<div class="editPrev"><video id="editVid" src="' +
+            url +
+            '" muted playsinline controls></video>' +
+            '<div class="editMeta"><span class="pill">' +
+            fmtT(d) +
+            '</span><span class="pill grey">' +
+            (typeof AbMedia.bytesLabel === "function"
+              ? AbMedia.bytesLabel(STUDIO.blob.size)
+              : STUDIO.blob.size + " B") +
+            "</span></div></div>" +
+            '<div class="trimWell"><div class="row sb"><span class="meta">Trim</span>' +
+            '<span class="meta" id="trimLen">' +
+            fmtT(Math.max(0, STUDIO.trim.b - STUDIO.trim.a)) +
+            " kept</span></div>" +
+            rng("Start", "clipTrimA", STUDIO.trim.a) +
+            rng("End", "clipTrimB", STUDIO.trim.b) +
+            "</div>" +
+            '<div><div class="row sb" style="margin-bottom:7px"><span class="meta">Filter</span>' +
+            '<span class="meta">' +
+            esc(STUDIO.filter) +
+            "</span></div>" +
+            '<div class="filterRail">' +
+            chips +
+            "</div></div>" +
+            '<div><div class="meta" style="margin-bottom:6px">Caption</div>' +
+            '<input class="field" id="clipCap" data-in="clipCap" maxlength="180" placeholder="what is happening here" value="' +
+            esc(STUDIO.caption) +
+            '"></div>' +
+            '<div class="editTray"><button class="btn ghost" data-act="clipDiscard">Discard</button>' +
+            '<button class="btn pri" data-act="clipPost"' +
+            (STUDIO.busy ? " disabled" : "") +
+            ">" +
+            (STUDIO.busy
+              ? '<span class="spin"></span>Saving…'
+              : I("send", "s") + "Post clip") +
+            "</button></div>" +
+            '<div class="meta" style="text-align:center">Trim and grade are kept as metadata — no re-encode, it posts the moment you tap.</div>' +
+            "</div>"
+          );
+        },
+        after() {
+          const v = el("#editVid");
+          if (!v) return;
+          v.style.filter = AbStudio.filterString(STUDIO.filter) || "none";
+          if (!STUDIO.probing && !STUDIO.dur && STUDIO.blob) {
+            STUDIO.probing = true;
+            AbMedia.video
+              .duration(STUDIO.blob)
+              .then((d) => {
+                STUDIO.probing = false;
+                STUDIO.dur = isFinite(d) && d > 0 ? d : 0;
+                STUDIO.trim = { a: 0, b: STUDIO.dur };
+                if (STUDIO.blob && S.route === "clipedit" && STUDIO.dur)
+                  render();
+              })
+              .catch(() => {
+                STUDIO.probing = false;
+              });
+          }
+        },
+      };
+
+      function patchTrim(which, val) {
+        const lab = el("#tv-" + which);
+        if (lab) lab.textContent = fmtT(val);
+        const len = el("#trimLen");
+        if (len)
+          len.textContent =
+            fmtT(Math.max(0, STUDIO.trim.b - STUDIO.trim.a)) + " kept";
+        if (which === "clipTrimA") {
+          const v = el("#editVid");
+          if (v) {
+            try {
+              v.currentTime = val;
+            } catch (e) {}
+          }
+        }
+      }
+      INPUTS.clipTrimA = (val) => {
+        let a = parseFloat(val);
+        if (!isFinite(a)) a = 0;
+        a = Math.max(0, Math.min(a, STUDIO.trim.b - 0.2));
+        STUDIO.trim.a = a;
+        patchTrim("clipTrimA", a);
+      };
+      INPUTS.clipTrimB = (val) => {
+        const d = STUDIO.dur || 0;
+        let b = parseFloat(val);
+        if (!isFinite(b)) b = d;
+        b = Math.min(Math.max(b, STUDIO.trim.a + 0.2), d || b);
+        STUDIO.trim.b = b;
+        patchTrim("clipTrimB", b);
+      };
+      INPUTS.clipCap = (val) => {
+        STUDIO.caption = val;
+      };
+
+      Object.assign(ACTIONS, {
+        clipAbandon() {
+          studioClear();
+          S.tab = "clips";
+          go("clips");
+        },
+        clipDiscard() {
+          studioClear();
+          back();
+        },
+        clipSrc(id) {
+          studioClear();
+          STUDIO.err = "";
+          if (id === "file") {
+            const f = el("#clipFile");
+            if (f) f.click();
+            return;
+          }
+          const md = navigator.mediaDevices;
+          if (!md) {
+            STUDIO.err =
+              "This browser exposes no camera or screen capture on this page.";
+            render();
+            return;
+          }
+          const req =
+            id === "screen"
+              ? md.getDisplayMedia({ video: { cursor: "monitor" }, audio: true })
+              : md.getUserMedia({
+                  video: { facingMode: STUDIO.facing },
+                  audio: true,
+                });
+          req
+            .then((st) => {
+              STUDIO.stream = st;
+              STUDIO.src = id;
+              STUDIO.err = "";
+              render();
+            })
+            .catch(() => {
+              STUDIO.stream = null;
+              STUDIO.src = null;
+              STUDIO.err =
+                id === "screen"
+                  ? "Screen capture was refused. Allow it and try again."
+                  : "Camera was refused. Allow it in the address bar and try again.";
+              render();
+            });
+        },
+        clipSwap() {
+          if (STUDIO.src !== "camera") {
+            studioClear();
+            render();
+            return;
+          }
+          const md = navigator.mediaDevices;
+          if (!md || !md.getUserMedia) return;
+          STUDIO.facing =
+            STUDIO.facing === "environment" ? "user" : "environment";
+          studioStop();
+          md.getUserMedia({
+            video: { facingMode: STUDIO.facing },
+            audio: true,
+          })
+            .then((st) => {
+              STUDIO.stream = st;
+              STUDIO.err = "";
+              render();
+            })
+            .catch(() => {
+              STUDIO.err = "That camera is not available here.";
+              render();
+            });
+        },
+        clipRec() {
+          if (STUDIO.busy) return;
+          if (STUDIO.handle) {
+            const h = STUDIO.handle;
+            STUDIO.handle = null;
+            if (STUDIO.tick) {
+              clearInterval(STUDIO.tick);
+              STUDIO.tick = null;
+            }
+            STUDIO.busy = true;
+            render();
+            h.stop()
+              .then((blob) => {
+                studioClear();
+                if (!blob || !blob.size) {
+                  STUDIO.busy = false;
+                  STUDIO.err = "Nothing was captured. Try another source.";
+                  render();
+                  return;
+                }
+                STUDIO.blob = blob;
+                STUDIO.src = "rec";
+                STUDIO.busy = false;
+                go("clipedit");
+              })
+              .catch(() => {
+                STUDIO.busy = false;
+                STUDIO.err = "The recording could not be saved.";
+                render();
+              });
+            return;
+          }
+          if (!STUDIO.stream) {
+            STUDIO.err = "Pick a camera or screen first.";
+            render();
+            return;
+          }
+          try {
+            STUDIO.handle = AbStudio.capture({
+              stream: STUDIO.stream,
+              maxMs: 60000,
+            });
+            STUDIO.ms = 0;
+            STUDIO.handle.start();
+            STUDIO.busy = false;
+            render();
+            STUDIO.tick = setInterval(() => {
+              STUDIO.ms = STUDIO.handle ? STUDIO.handle.ms : 0;
+              const t = el("#recTime"),
+                b = el("#recFill");
+              if (t) t.textContent = fmtT(STUDIO.ms / 1000) + " / 1:00";
+              if (b) b.style.width = Math.min(100, (STUDIO.ms / 60000) * 100) + "%";
+              if (STUDIO.ms >= 60000) ACTIONS.clipRec();
+            }, 250);
+          } catch (e) {
+            STUDIO.err =
+              "Cannot record here: " + ((e && e.message) || "unknown error");
+            render();
+          }
+        },
+        clipFilterSet(id) {
+          STUDIO.filter = id;
+          const v = el("#editVid");
+          if (v) v.style.filter = AbStudio.filterString(id) || "none";
+          const chips = document.querySelectorAll(".fchip");
+          for (let i = 0; i < chips.length; i++)
+            chips[i].classList.toggle(
+              "on",
+              chips[i].getAttribute("data-id") === id,
+            );
+        },
+        clipPost() {
+          if (STUDIO.busy || !STUDIO.blob) return;
+          STUDIO.busy = true;
+          render();
+          const id =
+            "cl" +
+            Date.now().toString(36) +
+            Math.floor(Math.random() * 1296).toString(36);
+          const meta = {
+            id: id,
+            uid: "me",
+            t: 0,
+            scene: "lab",
+            dur: fmtT(STUDIO.dur || 0),
+            cap: (STUDIO.caption || "").trim() || "no caption yet",
+            likes: 0,
+            comments: 0,
+            views: 0,
+            approved: false,
+            mine: true,
+            saves: 0,
+            sound: "original audio",
+            tag: "#firstclip",
+            grade: STUDIO.filter,
+            cut: [
+              Math.round(STUDIO.trim.a * 10) / 10,
+              Math.round(STUDIO.trim.b * 10) / 10,
+            ],
+          };
+          clipPut({ id: id, blob: STUDIO.blob, meta: meta }).then((ok) => {
+            CLIPS.unshift(Object.assign({}, meta, { blobId: id }));
+            studioClear();
+            S.clipSeg = "yours";
+            S.clipIdx = 0;
+            go("clips");
+            toast(
+              "Clip queued",
+              ok
+                ? "Only you can see it until a moderator clears it."
+                : "This device has no storage available, so it lives for this session only.",
+            );
+          });
+        },
+        clipMute(id) {
+          const wasMuted = S.clipMuted[id] !== false;
+          S.clipMuted[id] = !wasMuted;
+          const v = document.querySelector('video[data-cv="' + id + '"]');
+          if (v) {
+            v.muted = !wasMuted;
+            if (!wasMuted) {
+              const p = v.play();
+              if (p && p.catch) p.catch(() => {});
+            }
+          }
+          render();
+        },
+      });
+
       /* deep link support: #/clips, #/oracle/polls, #/games … */
       try {
         /* a fresh load always starts at the calculator. nothing walks past the door —
