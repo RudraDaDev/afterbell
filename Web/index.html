@@ -2157,6 +2157,14 @@
         top: 44px;
         left: 10px;
         z-index: 6;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 7px;
+      }
+      .reelPending .btn {
+        font-size: 11px;
+        padding: 7px 11px;
       }
 
       /* ---------- polls ---------- */
@@ -2831,6 +2839,13 @@
       /* =========================================================================
    CLIP STUDIO — source picker, recorder, editor, real video playback
    ========================================================================= */
+      .clipArt {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #0c0c08;
+      }
       .clipVid {
         position: absolute;
         inset: 0;
@@ -7844,7 +7859,7 @@
                       '<button class="clipTile" data-act="openClip" data-id="' +
                       c.id +
                       '">' +
-                      frameSVG(c.scene, i) +
+                      clipArt(c, i) +
                       '<span class="pl">' +
                       I("play", "s") +
                       '</span><span class="dur">' +
@@ -8018,7 +8033,7 @@
             '" data-act="kind" data-id="text">Text</button>' +
             '<button class="' +
             (d.kind === "video" ? "on" : "") +
-            '" data-act="kind" data-id="video">Clip</button>' +
+            '" data-act="go" data-to="clipmake">Clip</button>' +
             '<button class="' +
             (d.kind === "poll" ? "on" : "") +
             '" data-act="kind" data-id="poll">Poll</button></div>' +
@@ -12063,7 +12078,15 @@
           (pend
             ? '<div class="reelPending"><span class="pill warn">' +
               I("clock", "s") +
-              "only you can see this · pending review</span></div>"
+              "only you can see this · pending review</span>" +
+              (c.blobId
+                ? '<button class="btn ghost" data-act="clipDelete" data-id="' +
+                  c.id +
+                  '">' +
+                  I("x", "s") +
+                  "Discard</button>"
+                : "") +
+              "</div>"
             : "") +
           '<div class="rail">' +
           '<button class="rbtn' +
@@ -12229,7 +12252,7 @@
             esc(c.dur) +
             "</span></div>" +
             '<div style="margin:10px 0">' +
-            still(c.scene, c.t * 3, "") +
+            clipStill(c, c.t * 3, "") +
             "</div>" +
             '<div class="row" style="gap:6px;flex-wrap:wrap"><span class="pill grey">' +
             I("bolt", "s") +
@@ -12857,7 +12880,7 @@
                           '<button class="clipTile" data-act="openClip" data-id="' +
                           c.id +
                           '">' +
-                          frameSVG(c.scene, i) +
+                          clipArt(c, i) +
                           '<span class="pl">' +
                           I("play", "s") +
                           '</span><span class="dur">' +
@@ -13234,7 +13257,7 @@
           sheet(
             '<h2>Send this clip</h2><p class="lede">Inside the invite list only. There is no external sharing link — that is deliberate.</p>' +
               '<div class="card flat row" style="gap:9px"><div style="width:62px">' +
-              still(c.scene, c.t, "") +
+              clipStill(c, c.t, "") +
               "</div>" +
               '<div class="grow tiny">' +
               esc(c.cap.slice(0, 70)) +
@@ -14338,6 +14361,16 @@
           .then((r) => r || null)
           .catch(() => null);
       }
+      function clipRemove(id) {
+        if (!id) return Promise.resolve(false);
+        return clipDb()
+          .then(() => AbMedia.store.del(CLIP_DB, CLIP_STORE, id))
+          .then(() => true)
+          .catch(() => false);
+      }
+      /* real frame grabs for clips we recorded, keyed by clip id.
+      every other surface still draws the SVG scene until one exists. */
+      const THUMB = {};
       function clipHydrate() {
         return clipDb()
           .then(() => AbMedia.store.all(CLIP_DB, CLIP_STORE))
@@ -14346,11 +14379,45 @@
               if (!r || !r.meta || CLIPS.some((c) => c.id === r.meta.id))
                 return;
               CLIPS.unshift(Object.assign({}, r.meta, { blobId: r.id }));
+              if (r.thumb) cacheThumb(r.id, r.thumb);
             });
           })
           .catch(() => {});
       }
       clipHydrate();
+
+      function cacheThumb(id, blob) {
+        if (!blob || !id) return "";
+        if (!THUMB[id]) THUMB[id] = URL.createObjectURL(blob);
+        return THUMB[id];
+      }
+      function clipArt(c, seed) {
+        const u = c && c.blobId ? THUMB[c.id] : "";
+        if (u) return '<img class="clipArt" src="' + u + '" alt="">';
+        return frameSVG(c.scene, seed);
+      }
+      function clipStill(c, seed, label) {
+        const u = c && c.blobId ? THUMB[c.id] : "";
+        if (u)
+          return (
+            '<div class="imgframe" style="position:relative"><div class="stil">' +
+            '<img class="clipArt" src="' +
+            u +
+            '" alt="">' +
+            "</div>" +
+            (label ? '<span class="tick">' + esc(label) + "</span>" : "") +
+            "</div>"
+          );
+        return still(c.scene, seed, label);
+      }
+      function grabThumb(blob) {
+        try {
+          const p = AbMedia.video.thumb(blob, { max: 480, quality: 0.78 });
+          return p && p.then ? p.catch(() => null) : Promise.resolve(null);
+        } catch (e) {
+          return Promise.resolve(null);
+        }
+      }
 
       const STUDIO = {
         src: null,
@@ -14842,6 +14909,7 @@
           if (STUDIO.busy || !STUDIO.blob) return;
           STUDIO.busy = true;
           render();
+          const taken = STUDIO.blob;
           const id =
             "cl" +
             Date.now().toString(36) +
@@ -14867,19 +14935,26 @@
               Math.round(STUDIO.trim.b * 10) / 10,
             ],
           };
-          clipPut({ id: id, blob: STUDIO.blob, meta: meta }).then((ok) => {
-            CLIPS.unshift(Object.assign({}, meta, { blobId: id }));
-            studioClear();
-            S.clipSeg = "yours";
-            S.clipIdx = 0;
-            go("clips");
-            toast(
-              "Clip queued",
-              ok
-                ? "Only you can see it until a moderator clears it."
-                : "This device has no storage available, so it lives for this session only.",
-            );
-          });
+          grabThumb(taken)
+            .then((thumb) =>
+              clipPut({ id: id, blob: taken, meta: meta, thumb: thumb }).then(
+                (ok) => ({ ok: ok, thumb: thumb }),
+              ),
+            )
+            .then((r) => {
+              if (r.thumb) cacheThumb(id, r.thumb);
+              CLIPS.unshift(Object.assign({}, meta, { blobId: id }));
+              studioClear();
+              S.clipSeg = "yours";
+              S.clipIdx = 0;
+              go("clips");
+              toast(
+                "Clip queued",
+                r.ok
+                  ? "Only you can see it until a moderator clears it."
+                  : "This device has no storage available, so it lives for this session only.",
+              );
+            });
         },
         clipMute(id) {
           const wasMuted = S.clipMuted[id] !== false;
@@ -14893,6 +14968,47 @@
             }
           }
           render();
+        },
+        clipDelete(id) {
+          const c = CLIPS.find((x) => x.id === id);
+          if (!c) return;
+          sheet(
+            '<h2>Discard this clip?</h2>' +
+              '<p class="lede">It never left this device and no moderator has seen it. The video is deleted for good.</p>' +
+              '<div class="card flat row" style="gap:9px;margin-top:10px"><div style="width:62px;flex:0 0 auto;overflow:hidden;border-radius:6px">' +
+              clipStill(c, 0, "") +
+              "</div>" +
+              '<div class="grow tiny">' +
+              esc((c.cap || "").slice(0, 70)) +
+              "</div></div>" +
+              '<div class="editTray"><button class="btn ghost" data-act="closeSheet">Keep it</button>' +
+              '<button class="btn brick" data-act="clipDeleteGo" data-id="' +
+              id +
+              '">' +
+              I("x", "s") +
+              "Discard</button></div>",
+          );
+        },
+        clipDeleteGo(id) {
+          const i = CLIPS.findIndex((x) => x.id === id);
+          if (i > -1) {
+            const c = CLIPS[i];
+            CLIPS.splice(i, 1);
+            if (c.blobId) {
+              clipRemove(c.blobId);
+              delete THUMB[c.id];
+            }
+            delete S.clipLikes[id];
+            delete S.clipSaves[id];
+          }
+          closeSheet();
+          if (S.clipIdx >= clipList().length)
+            S.clipIdx = Math.max(0, clipList().length - 1);
+          render();
+          toast(
+            "Discarded",
+            "The video is off this device. Nothing was ever sent anywhere.",
+          );
         },
       });
 
@@ -16581,7 +16697,7 @@
                       c.id +
                       '">' +
                       '<div style="position:relative">' +
-                      still(c.scene, i, c.dur) +
+                      clipStill(c, i, c.dur) +
                       '<span class="pill" style="position:absolute;top:5px;left:5px">' +
                       I("play", "s") +
                       c.likes +
@@ -23126,7 +23242,7 @@
           '<button class="clipInline" data-act="openClip" data-id="' +
           c.id +
           '">' +
-          frameSVG(c.scene, c.id.length) +
+          clipArt(c, c.id.length) +
           '<span class="pl">' +
           I("play", "l") +
           '</span><span class="dur">' +

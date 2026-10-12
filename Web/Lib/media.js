@@ -73,7 +73,13 @@
         let out;
         try { out = fn(t.objectStore(storeName), t); }
         catch (e) { try { t.abort(); } catch (_) {} return rej(e); }
-        t.oncomplete = () => res(out && out.result !== undefined ? out.result : out);
+        t.oncomplete = () => {
+          // every store op returns an IDBRequest. resolve with its .result so a
+          // missing key comes back as undefined — not the request object, which
+          // is truthy and made lookups of absent records look like hits.
+          const isReq = out != null && typeof out === 'object' && 'onsuccess' in out && 'result' in out;
+          res(isReq ? out.result : out);
+        };
         t.onerror = () => rej(t.error || new Error('tx failed'));
         t.onabort = () => rej(t.error || new Error('tx aborted'));
       }));
