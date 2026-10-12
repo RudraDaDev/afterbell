@@ -6220,32 +6220,50 @@
         return out;
       }
       function swearApply(text) {
-        if (!text || !S.swears.on) return text;
-        const ents = activeSwearEntries();
-        if (!ents.length) return text;
-        const key =
-          S.swears.tier +
-          "|" +
-          ents.length +
-          "|" +
-          (S.swears.extra || []).join("~");
-        const m = matcherOf(key, ents);
-        const hits = scanMatches(text, m.ents, m.re, m.starts, false);
+        if (!text) return text;
+        const hits = [];
+        /* Slurs are redacted for every reader, using the same embedded-word rule
+       the gate uses, so what people see always matches what the gateway would
+       have refused. That is retroactive redaction (BACKEND-PLAN §3.3): it does
+       not sit behind S.swears.on, which only ever governed the swear tiers. */
+        scanMatches(text, SLUR_M.ents, SLUR_M.re, SLUR_M.starts, true).forEach(
+          (h) => hits.push(h),
+        );
+        if (S.swears.on) {
+          const ents = activeSwearEntries();
+          if (ents.length) {
+            const m = matcherOf(
+              S.swears.tier +
+                "|" +
+                ents.length +
+                "|" +
+                (S.swears.extra || []).join("~"),
+              ents,
+            );
+            scanMatches(text, m.ents, m.re, m.starts, false).forEach((h) =>
+              hits.push(h),
+            );
+          }
+        }
         if (!hits.length) return text;
+        /* two scans over one text: walk left to right and skip anything that
+       would land inside a span we already emitted */
+        hits.sort((a, b) => a.s - b.s || a.e - b.e);
         const mode = S.swears.mode;
         let out = "",
           at = 0;
         for (let i = 0; i < hits.length; i++) {
-          const h = hits[i],
-            raw = text.slice(h.s, h.e);
+          const h = hits[i];
+          if (h.s < at) continue;
+          const raw = text.slice(h.s, h.e);
           out += text.slice(at, h.s);
-          const keep = mode === "soften" && h.ent.soft ? h.ent.soft : null;
+          const soften = mode === "soften" && h.ent.soft;
           const letters = (raw.match(/[a-z0-9]/gi) || ["x"]).length;
           out +=
             "\u0001" +
-            mode +
+            (soften ? "soften" : "redact") +
             "\u0002" +
-            (keep || "\u25AE".repeat(letters)) +
+            (soften ? h.ent.soft : "\u25AE".repeat(letters)) +
             "\u0003";
           at = h.e;
         }
@@ -6363,6 +6381,8 @@
               JINGLE.sym;
           const fs = el("#filterStrip");
           if (fs) fs.innerHTML = filterStrip(filterCheck(next));
+          const pv = el("#previewStrip");
+          if (pv) pv.innerHTML = previewStrip(next);
           const pb = el("#postBtn");
           if (pb) pb.disabled = !next.trim() || filterCheck(next).length > 0;
         } else if (target === "ctext") {
@@ -8062,6 +8082,9 @@
             '<div id="filterStrip" style="margin-top:12px">' +
             filterStrip(hits) +
             "</div>" +
+            '<div id="previewStrip" style="margin-top:10px">' +
+            previewStrip(d.text) +
+            "</div>" +
             (d.kind === "video"
               ? '<div class="sect"><h2>Video</h2><div class="rule"></div><span class="meta">pending by default</span></div>' +
                 '<div class="grid3">' +
@@ -8259,6 +8282,21 @@
             ? '<div class="tiny" style="margin-top:5px">' + esc(hint) + "</div>"
             : "") +
           '<div class="tiny" style="margin-top:5px">Nothing has been saved — that is the whole point of doing this before the write.</div></div>'
+        );
+      }
+      /* Not a gate — the notice above decides whether this can be posted. This is
+   the other half: your own words rendered the way every reader receives
+   them, redactions and all, so there is no surprise after you hit send. */
+      function previewStrip(text) {
+        if (!text || !text.trim()) return "";
+        return (
+          '<div class="notice" style="background:var(--card2)">' +
+          '<div class="row" style="gap:7px"><span class="pill grey">' +
+          I("eye", "s") +
+          'as everyone else reads it</span><span class="tiny grow" style="text-align:right">live</span></div>' +
+          '<div class="txt" style="margin-top:7px">' +
+          renderText(text) +
+          "</div></div>"
         );
       }
 
@@ -8736,6 +8774,8 @@
         S.draft.text = v;
         const s = el("#filterStrip");
         if (s) s.innerHTML = filterStrip(filterCheck(v));
+        const pv = el("#previewStrip");
+        if (pv) pv.innerHTML = previewStrip(v);
         const b = el("#postBtn");
         if (b) b.disabled = !v.trim() || filterCheck(v).length > 0;
         const c = el("#charCount");
