@@ -11362,19 +11362,51 @@
           "</div>"
         );
       }
+      /* Who is actually signed in. The live session wins over the local demo
+   identity, so a screen that claims an owner tells the truth instead of
+   printing the seeded moderator's name over everybody's session. */
+      function whoAmI() {
+        const u = AB.user || null;
+        return {
+          name:
+            (u && u.name) ||
+            S.me.name ||
+            S.token.name ||
+            "Rudra Chitambare",
+          handle: (u && u.handle) || S.me.handle || "rudra.c",
+          sec: (u && u.section) || S.me.sec || "7-A",
+          role: (u && u.role) || S.consoleRole || "student",
+          live: !!u,
+        };
+      }
       SCREENS.mod = {
         render() {
           const acting = MOD_OF_DAY,
             restricted = restrictedFor(acting).map((u) => u.n.split(" ")[0]);
+          const who = whoAmI();
           const pending = S.queue.filter(
             (q) => q.status === "pending" || q.status === "second",
           );
           return (
-            '<div class="row sb"><div><div class="meta">Logged in as</div><h2>Meera Joshi · moderator</h2>' +
-              '<div class="tiny">7-A, 7-B, 7-C all have a mod. Pick your fights across friend groups, not inside one.</div></div>' +
+            '<div class="row sb"><div><div class="meta">Logged in as</div><h2>' +
+              esc(who.name) +
+              " · " +
+              esc(who.role) +
+              "</h2>" +
+              '<div class="tiny">@' +
+              esc(who.handle) +
+              " · " +
+              esc(who.sec) +
+              ". 7-A, 7-B, 7-C all have a mod. Pick your fights across friend groups, not inside one.</div></div>" +
+              '<div class="row" style="gap:7px">' +
               '<span class="pill chalk">' +
               I("shield", "s") +
-              "mod</span></div>" +
+              esc(who.role) +
+              "</span>" +
+              '<button class="btn sm" data-act="abSignIn">' +
+              I(who.live ? "sliders" : "lock", "s") +
+              (who.live ? "Switch" : "Sign in") +
+              "</button></div></div>" +
               '<div class="grid3" style="margin:14px 0">' +
               '<div class="stat"><div class="n">' +
               pending.length +
@@ -17953,11 +17985,13 @@
             '<div class="card flat" style="background:linear-gradient(120deg,rgba(36,70,58,.1),transparent 65%);border-width:2px">' +
             '<div class="row sb"><div><div class="meta">Afterbell console</div>' +
             '<h2 style="margin:2px 0 0">' +
-            (R === "admin"
-              ? "Rudra Chitambare · admin"
-              : "Meera Joshi · moderator") +
+            esc(whoAmI().name) +
+            " · " +
+            R +
             "</h2>" +
-            '<div class="tiny">signing in as ' +
+            '<div class="tiny">@' +
+            esc(whoAmI().handle) +
+            " · signing in as " +
             (R === "admin"
               ? "the person who runs the box"
               : "a moderator on shift") +
@@ -22141,6 +22175,7 @@
                 "You are " + S.me.handle + " now.",
               );
               feedSync();
+              render();
             } else {
               const why =
                 (r && r.body && (r.body.note || r.body.error)) ||
@@ -22148,6 +22183,60 @@
               toast("Could not sign in", why);
             }
           });
+        },
+        /* the same switch, lifted out of the settings sheet so the desk that
+       needs it can reach it without going hunting. */
+        abSignIn() {
+          const who = whoAmI();
+          sheet(
+            "<h2>Who is at the desk</h2>" +
+              '<p class="lede">The invite gate only ever creates a student. Approving anything needs a moderator or the admin, so this is the switch — and it lives here, not buried under settings.</p>' +
+              '<div class="card flat"><div class="row sb"><div><div class="meta">Currently</div>' +
+              '<h2 style="margin:2px 0 0">' +
+              esc(who.name) +
+              " · " +
+              esc(who.role) +
+              "</h2>" +
+              '<div class="tiny">@' +
+              esc(who.handle) +
+              " · " +
+              esc(who.sec) +
+              (who.live ? " · live session" : " · local only, no server") +
+              "</div></div>" +
+              (who.live
+                ? '<span class="pill hl">' + esc(who.role) + "</span>"
+                : '<span class="pill grey">no session</span>') +
+              "</div></div>" +
+              (AB.base
+                ? '<div class="divider dash" style="margin-top:12px"></div>'
+                : '<div class="notice" style="margin-top:10px">' +
+                  I("warn", "s") +
+                  '<div class="tiny grow">No endpoint set yet. Nothing can be signed in until this points at the backend.</div>' +
+                  '<button class="btn sm" data-act="abCfg">Set endpoint</button></div>' +
+                  '<div class="divider dash" style="margin-top:12px"></div>') +
+              '<div class="meta" style="margin-top:10px">Test mode only — sign in as a seeded user</div>' +
+              '<div class="tiny" style="margin:3px 0 7px">The server refuses this outside test mode. <b>rudra.c</b> is the admin, <b>meera</b> is the moderator, <b>arjun.m</b> and <b>zoya.k</b> are students.</div>' +
+              '<div class="row" style="gap:7px">' +
+              '<input class="field mono" id="abDevHandle" placeholder="' +
+              esc(who.handle) +
+              '">' +
+              '<button class="btn sm pri" data-act="abDevLogin">Sign in</button></div>' +
+              (who.live
+                ? '<div style="height:8px"></div><button class="btn wide" data-act="abSignOut">End this session</button>'
+                : ""),
+          );
+        },
+        abSignOut() {
+          AB.key = "";
+          AB.user = null;
+          S.me.id = "";
+          closeSheet();
+          persist();
+          render();
+          toast(
+            "Signed out",
+            "Still pointed at the endpoint, but nobody is signed in.",
+          );
         },
         abLocalhost() {
           const i = el("#abBase");
@@ -24071,6 +24160,8 @@
           "abClear",
           "abLocalhost",
           "abDevLogin",
+          "abSignIn",
+          "abSignOut",
           "srvApprove",
           "srvReject",
           "srvRefresh",
